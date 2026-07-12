@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
             // ---------- 45 people ----------
             const names = [
                 "Emma Watson", "Liam Neeson", "Scarlett Johansson", "Dwayne Johnson", "Taylor Swift",
@@ -163,6 +163,28 @@
                 return selectedGame ? { ...selectedGame } : null;
             }
 
+            function syncGameRevealState(state) {
+                const hasRevealState = Object.prototype.hasOwnProperty.call(state || {}, 'gameRevealVisible');
+                if (hasRevealState) {
+                    isGameRevealVisible = Boolean(state?.gameRevealVisible);
+                }
+                const hasTimerState = Object.prototype.hasOwnProperty.call(state || {}, 'gameRevealTimerVisible');
+                if (hasTimerState) {
+                    isGameTimerVisible = Boolean(state?.gameRevealTimerVisible);
+                }
+                if (typeof state?.gameTimerDurationSeconds === 'number') {
+                    gameTimerDurationSeconds = normalizeTimerSeconds(state.gameTimerDurationSeconds);
+                }
+                if (typeof state?.gameTimerRemainingSeconds === 'number') {
+                    gameTimerRemainingSeconds = Math.max(0, Math.floor(state.gameTimerRemainingSeconds));
+                }
+                if (typeof state?.gameTimerRunning === 'boolean' && state.gameTimerRunning) {
+                    isGameTimerRunning = true;
+                } else if (!isGameTimerVisible) {
+                    isGameTimerRunning = false;
+                }
+            }
+
             function applyGameState(state) {
                 const previousGameId = selectedGame?.id || null;
                 availableGames = normalizeGameList(state?.games);
@@ -172,6 +194,7 @@
                     stopGameTimer();
                     isGameTimerVisible = false;
                 }
+                syncGameRevealState(state);
                 latestCloudState = state || null;
                 renderGameReveal();
             }
@@ -290,6 +313,8 @@
                 currentPerson = null;
                 lastTargetNumber = null;
                 isGameRevealVisible = false;
+                isGameTimerVisible = false;
+                isGameTimerRunning = false;
                 isSpinning = false;
                 currentAngle = 0;
                 drawWheel(0);
@@ -430,6 +455,11 @@
                         removedGameIds: Array.isArray(gameState.removedGameIds)
                             ? gameState.removedGameIds.map(String)
                             : [],
+                        gameRevealVisible: isGameRevealVisible,
+                        gameRevealTimerVisible: isGameTimerVisible,
+                        gameTimerDurationSeconds,
+                        gameTimerRemainingSeconds,
+                        gameTimerRunning: isGameTimerRunning,
                         currentAngle,
                         currentPerson: currentPerson ? { ...currentPerson } : null,
                         lastTargetNumber,
@@ -990,6 +1020,7 @@
                 if (action === 'start') startGameTimer();
                 if (action === 'pause') pauseGameTimer();
                 if (action === 'reset') resetGameTimer(true);
+                void persistState('game-timer-updated', { action, visible: isGameRevealVisible, timerVisible: isGameTimerVisible, remainingSeconds: gameTimerRemainingSeconds });
             }
 
             function revealSelectedGame() {
@@ -998,6 +1029,7 @@
                 resetGameTimer(false);
                 renderGameReveal();
                 gameFullscreenCard?.querySelector('[data-game-next], [data-game-enter]')?.focus();
+                void persistState('game-reveal-opened', { visible: true });
             }
 
             function hideGameReveal() {
@@ -1005,6 +1037,7 @@
                 isGameTimerVisible = false;
                 isGameRevealVisible = false;
                 renderGameReveal();
+                void persistState('game-reveal-closed', { visible: false });
             }
 
             function enterSelectedGame() {
@@ -1014,6 +1047,7 @@
                 resetGameTimer(false);
                 renderGameReveal();
                 gameFullscreenCard?.querySelector('[data-game-timer-action="start"]')?.focus();
+                void persistState('game-timer-opened', { visible: true, timerVisible: true });
             }
 
             function applyAvatarColors() {
