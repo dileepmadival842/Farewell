@@ -909,8 +909,8 @@ html::after {
 .round-complete-overlay.active { display: flex; }
 
 .round-complete-shell {
-    width: min(920px, 100%);
-    max-height: calc(100vh - 2rem);
+    width: 1200px;
+    max-height: 750px
     overflow-y: auto;
     border: 3px solid rgba(255, 214, 102, 0.38);
     border-radius: 20px;
@@ -984,7 +984,7 @@ html::after {
 .round-complete-avatar {
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: 14px;
+    border-radius: 10px;
     display: grid;
     place-items: center;
     margin-bottom: 0.65rem;
@@ -992,15 +992,10 @@ html::after {
     font-weight: 800;
     font-family: var(--font-display);
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(2, 6, 18, 0.95), rgba(8, 14, 28, 0.85));
 }
 
 img.round-complete-avatar {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
-    object-position: center;
+    object-fit: cover;
     background: #0a0e1c;
     border: 1px solid rgba(255, 214, 102, 0.34);
     box-shadow: 0 0 0 1px rgba(255, 214, 102, 0.12);
