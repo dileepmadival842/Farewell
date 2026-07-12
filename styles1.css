@@ -959,6 +959,7 @@ html::after {
 }
 
 .round-complete-grid {
+    height: 500px;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.85rem;
@@ -983,6 +984,7 @@ html::after {
 
 .round-complete-avatar {
     width: 100%;
+    height:90%;
     aspect-ratio: 1 / 1;
     border-radius: 10px;
     display: grid;
@@ -1003,9 +1005,9 @@ img.round-complete-avatar {
 
 .round-complete-name {
     color: #eef5ff;
-    font-weight: 700;
-    font-size: 0.9rem;
-    line-height: 1.2;
+    font-weight: 1000;
+    font-size: 1.4rem;
+    line-height: 1.5;
     min-height: 2.2em;
     overflow-wrap: anywhere;
     display: -webkit-box;
