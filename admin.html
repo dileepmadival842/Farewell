@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>45-SPIN Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="admin-body">
+    <main class="admin-shell">
+        <section class="admin-hero">
+            <div>
+                <a class="admin-back-link" href="index.html"><i class="fas fa-arrow-left"></i> wheel</a>
+                <h1><i class="fas fa-user-pen"></i> Person Admin</h1>
+                <p>Add names, details, and photos for the 45-SPIN farewell wheel.</p>
+            </div>
+            <div class="admin-hero-actions">
+                <div class="admin-status" id="connectionStatus">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    checking login
+                </div>
+                <button class="clear-btn" id="logoutBtn" type="button"><i class="fas fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </section>
+
+        <section class="admin-layout">
+            <form class="admin-form" id="personForm">
+                <div class="form-card-title">
+                    <h2>New Person</h2>
+                    <span id="formMode">ready</span>
+                </div>
+
+                <label class="field-label" for="personNumber">Number</label>
+                <input id="personNumber" name="number" type="number" min="1" max="45" placeholder="1 - 45" required />
+
+                <label class="field-label" for="personName">Name</label>
+                <input id="personName" name="name" type="text" maxlength="80" placeholder="Full name" required />
+
+                <label class="field-label" for="personRole">Detail</label>
+                <input id="personRole" name="role" type="text" maxlength="120" placeholder="Batch, role, nickname..." />
+
+                <label class="field-label" for="personNote">Message</label>
+                <textarea id="personNote" name="note" maxlength="240" placeholder="Short farewell detail"></textarea>
+
+                <label class="image-drop" for="personImage" id="imageDrop">
+                    <input id="personImage" name="image" type="file" accept="image/*" />
+                    <img id="imagePreview" alt="" />
+                    <span class="image-drop-copy">
+                        <i class="fas fa-cloud-arrow-up"></i>
+                        <strong>Upload image</strong>
+                        <small>JPG, PNG, or WebP</small>
+                    </span>
+                </label>
+
+                <div class="admin-actions">
+                    <button class="clear-btn" type="reset"><i class="fas fa-rotate-left"></i> Reset</button>
+                    <button class="spin-btn" type="submit" id="savePersonBtn"><i class="fas fa-floppy-disk"></i> Save</button>
+                </div>
+            </form>
+
+            <section class="people-panel">
+                <div class="setup-panel" id="setupPanel" hidden>
+                    <div>
+                        <h2><i class="fas fa-database"></i> Supabase setup needed</h2>
+                        <p>The admin page is connected, but Supabase returned 404 for the people table. Run the SQL from <strong>supabase-setup.sql</strong> in your Supabase SQL editor, then refresh.</p>
+                    </div>
+                    <button class="clear-btn" id="copySetupBtn" type="button"><i class="fas fa-copy"></i> Copy SQL</button>
+                </div>
+                <div class="admin-section-tabs" role="tablist" aria-label="Admin sections">
+                    <button class="admin-section-tab active" type="button" data-admin-tab="people"><i class="fas fa-users"></i> People</button>
+                    <button class="admin-section-tab" type="button" data-admin-tab="games"><i class="fas fa-gamepad"></i> Games</button>
+                    <button class="admin-section-tab" type="button" data-admin-tab="cancelled"><i class="fas fa-rotate-left"></i> Cancelled</button>
+                </div>
+
+                <section class="admin-section-panel active" data-admin-section="people">
+                    <div class="people-panel-head">
+                        <div>
+                            <h2>People</h2>
+                            <span id="peopleCount">0 saved</span>
+                        </div>
+                        <button class="clear-btn" id="refreshPeopleBtn" type="button"><i class="fas fa-arrows-rotate"></i> Refresh</button>
+                    </div>
+                    <div class="admin-people-grid" id="peopleGrid">
+                        <div class="admin-empty">
+                            <i class="fas fa-address-book"></i>
+                            <span>No people yet</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="cancelled-panel admin-section-panel" id="cancelledPanel" data-admin-section="cancelled">
+                    <div class="people-panel-head compact">
+                        <div>
+                            <h2>Cancelled Picks</h2>
+                            <span id="cancelledCount">0 waiting</span>
+                        </div>
+                    </div>
+                    <div class="cancelled-grid" id="cancelledGrid">
+                        <div class="admin-empty compact-empty">
+                            <i class="fas fa-circle-check"></i>
+                            <span>No cancelled picks waiting</span>
+                        </div>
+                    </div>
+                </section>
+                <section class="game-admin-panel admin-section-panel" id="gameAdminPanel" data-admin-section="games">
+                    <div class="people-panel-head compact">
+                        <div>
+                            <h2>Game Selection</h2>
+                            <span id="selectedGameStatus">none selected</span>
+                        </div>
+                    </div>
+                    <form class="game-form" id="gameForm">
+                        <div class="game-form-grid">
+                            <div>
+                                <label class="field-label" for="gameName">Game Name</label>
+                                <input id="gameName" name="gameName" type="text" maxlength="80" placeholder="Game name" required />
+                            </div>
+                            <div>
+                                <label class="field-label" for="gamePosterUrl">Poster URL</label>
+                                <input id="gamePosterUrl" name="gamePosterUrl" type="url" placeholder="https://..." />
+                            </div>
+                        </div>
+                        <label class="game-poster-drop" for="gamePosterFile" id="gamePosterDrop">
+                            <input id="gamePosterFile" name="gamePosterFile" type="file" accept="image/*" />
+                            <img id="gamePosterPreview" alt="" />
+                            <span>
+                                <i class="fas fa-image"></i>
+                                Upload poster
+                            </span>
+                        </label>
+                        <label class="field-label" for="gameDetails">Details optional</label>
+                        <textarea id="gameDetails" name="gameDetails" maxlength="360" placeholder="Short game details"></textarea>
+
+                        <label class="field-label" for="gameRequirements">Requirements optional</label>
+                        <textarea id="gameRequirements" name="gameRequirements" maxlength="360" placeholder="Items, setup, or rules needed"></textarea>
+
+                        <label class="game-enter-choice" for="gameHasEnter">
+                            <input id="gameHasEnter" name="gameHasEnter" type="checkbox" />
+                            <span>Show Enter button for this game</span>
+                        </label>
+                        <div class="game-timer-field">
+                            <label class="field-label" for="gameTimerSeconds">Enter timer seconds</label>
+                            <input id="gameTimerSeconds" name="gameTimerSeconds" type="number" min="1" max="359999" step="1" value="60" placeholder="60" />
+                        </div>
+                        <div class="admin-actions game-actions">
+                            <button class="clear-btn" type="reset"><i class="fas fa-rotate-left"></i> Reset</button>
+                            <button class="spin-btn" type="submit" id="saveGameBtn"><i class="fas fa-plus"></i> Add Game</button>
+                        </div>
+                    </form>
+                    <div class="game-admin-grid" id="gameAdminGrid"></div>
+                </section>
+            </section>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="admin.js" defer></script>
+</body>
+</html>

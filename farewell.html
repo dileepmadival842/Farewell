@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spin & Reveal - 5-Round Event</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+    <div class="glass-card">
+
+        <div class="header">
+            <h1><i class="fas fa-crown"></i> 45-SPIN</h1>
+            <div class="stats">
+                <span><i class="fas fa-check-circle icon-accent"></i> picked <strong id="pickedCount">0</strong></span>
+                <span><i class="fas fa-rotate-left icon-muted"></i> left <strong id="leftCount">45</strong></span>
+                <a class="header-admin-link" href="login.html?force=1"><i class="fas fa-lock"></i> admin</a>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="wheel-wrapper">
+                <div class="wheel-top">
+                    <h2><i class="fas fa-circle"></i> spin & reveal</h2>
+                    <div class="wheel-actions">
+                        <button class="clear-btn" id="clearBtn" type="button"><i class="fas fa-trash-can"></i> CLEAR</button>
+                        <button class="spin-btn" id="spinBtn"><i class="fas fa-arrow-rotate-right"></i> SPIN</button>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="wheelCanvas" width="600" height="600"></canvas>
+                    <div class="pointer"><i class="fas fa-caret-down"></i></div>
+                    <div class="wheel-overlay" id="wheelOverlay">
+                        <div class="overlay-content">
+                            <div class="big-number" id="bigNumber">42</div>
+                            <div class="big-label"> selected</div>
+                            <div class="overlay-person" id="overlayPerson">
+                                <div class="overlay-avatar" id="overlayAvatar">
+                                    <img id="overlayImage" alt="" />
+                                    <span id="overlayInitial">E</span>
+                                </div>
+                                <div class="overlay-name" id="overlayName">Emma Watson</div>
+                                <div class="overlay-number" id="overlayNumber">42</div>
+                                <div class="overlay-detail" id="overlayRole"></div>
+                                <div class="overlay-note" id="overlayNote"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="round-info">
+                    <span><i class="fas fa-rotate-right icon-accent"></i> Round: <span class="round-progress" id="roundProgress">0/5</span></span>
+                    <span><i class="fas fa-users icon-accent"></i> Selected: <span id="roundSelectedCount">0</span></span>
+                    <span class="spin-duration"><i class="fas fa-clock"></i> <span id="spinDuration">5s</span> spin</span>
+                    <span class="rotation-count"><i class="fas fa-rotate"></i> <span id="rotationCount">5+</span> rotations</span>
+                    <span class="speed-indicator">
+                        <i class="fas fa-gauge-high"></i>
+                        <span class="speed-bar" id="speedBar">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-trophy"></i> Round Results</h3>
+                    <span class="round-badge" id="roundBadge">Round 0/5</span>
+                </div>
+                <div class="round-results" id="roundResults">
+                    <div class="empty-state">
+                        <i class="fas fa-hand-pointer"></i>
+                        <span>spin 5 times to complete round</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section" id="currentSection">
+            <div class="history-header">
+                <h3><i class="fas fa-list-ul"></i> current picks</h3>
+                <button class="next-btn" id="nextBtn"><i class="fas fa-arrow-right"></i> next</button>
+            </div>
+            <div class="history-grid" id="historyGrid">
+                <div class="empty-history">
+                    <i class="fas fa-inbox"></i>
+                    <span>no picks yet</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="saved-section" id="savedSection">
+            <div class="history-header">
+                <h3><i class="fas fa-folder-open"></i> saved details</h3>
+            </div>
+            <div class="history-grid saved-grid" id="savedGrid">
+                <div class="empty-history">
+                    <i class="fas fa-inbox"></i>
+                    <span>no saved details yet</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="round-complete-overlay" id="roundCompleteOverlay" aria-live="polite" aria-hidden="true">
+        <div class="round-complete-shell">
+            <div class="round-complete-head">
+                <span><i class="fas fa-trophy"></i> round complete</span>
+                <strong>5 selected</strong>
+            </div>
+            <div class="round-complete-grid" id="roundCompleteGrid"></div>
+            <button class="round-complete-next" id="roundCompleteNext" type="button">
+                <i class="fas fa-arrow-right"></i>
+                Next
+            </button>
+        </div>
+    </section>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js" defer></script>
+</body>
+</html>

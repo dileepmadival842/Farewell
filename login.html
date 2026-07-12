@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login - 45-SPIN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="admin-body">
+    <main class="login-shell">
+        <a class="admin-back-link" href="index.html"><i class="fas fa-arrow-left"></i> wheel</a>
+        <section class="login-card">
+            <div class="login-mark"><i class="fas fa-lock"></i></div>
+            <h1>Admin Login</h1>
+            <p>Sign in with the admin email and password created in Supabase Auth.</p>
+
+            <form id="loginForm" class="login-form">
+                <label class="field-label" for="adminEmail">Email</label>
+                <input id="adminEmail" name="email" type="email" autocomplete="email" placeholder="admin@example.com" required />
+
+                <label class="field-label" for="adminPassword">Password</label>
+                <div class="password-field">
+                    <input id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Password" required />
+                    <button id="togglePasswordBtn" class="icon-admin-btn" type="button" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                </div>
+
+                <button class="spin-btn login-submit" id="loginBtn" type="submit"><i class="fas fa-right-to-bracket"></i> Login</button>
+            </form>
+
+            <div class="login-help">
+                <strong>Need an account?</strong>
+                <span>Supabase Dashboard > Authentication > Users > Add user.</span>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="login.js" defer></script>
+</body>
+</html>
