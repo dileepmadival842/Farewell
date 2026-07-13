@@ -58,6 +58,13 @@
             const ROUND_SIZE = 5;
             let roundPicks = [];
 
+            // These numbers are reserved for the fifth round. There are six
+            // eligible numbers for five spins, so one of them will remain
+            // unselected after round 5.
+            const ROUND_FIVE_NUMBERS = Object.freeze([39, 37, 11, 6, 32, 1]);
+            const ROUND_FIVE_NUMBER_SET = new Set(ROUND_FIVE_NUMBERS);
+            const ROUND_FIVE_INDEX = 4;
+
             const gameOptions = [
                 { id: 'musical-chair', name: 'Musical Chair', image_url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=900&q=80', has_enter: false },
                 { id: 'treasure-hunt', name: 'Treasure Hunt', image_url: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=900&q=80', has_enter: false },
@@ -1113,9 +1120,16 @@
             }
 
             function getAvailableNumbers() {
+                const isRoundFive = savedRounds.length === ROUND_FIVE_INDEX;
                 const available = [];
                 for (let i = 1; i <= NUM_SEGMENTS; i++) {
-                    if (!pickedSet.has(i)) available.push(i);
+                    if (pickedSet.has(i)) continue;
+
+                    // Keep the preselected group out of rounds 1-4. In round
+                    // 5, make it the only group that can be landed on.
+                    if (isRoundFive ? ROUND_FIVE_NUMBER_SET.has(i) : !ROUND_FIVE_NUMBER_SET.has(i)) {
+                        available.push(i);
+                    }
                 }
                 return available;
             }
@@ -1144,7 +1158,9 @@
                     extraRotations: Math.floor(Math.random() * 4),
                     source: clientInstanceId,
                     createdAt: Date.now(),
-                    startAt: Date.now() + 700
+                    // Give every connected device time to receive the same
+                    // command before its animation begins.
+                    startAt: Date.now() + 1500
                 };
             }
 
@@ -1284,7 +1300,9 @@
                 if (available.length === 0) return;
 
                 const plannedTarget = Number(command?.targetNumber);
-                const hasSyncedTarget = Number.isInteger(plannedTarget) && plannedTarget >= 1 && plannedTarget <= NUM_SEGMENTS;
+                // Never accept a stale or invalid remote command that could
+                // bypass the current round's reserved-number rules.
+                const hasSyncedTarget = Number.isInteger(plannedTarget) && available.includes(plannedTarget);
                 const targetNumber = hasSyncedTarget
                     ? plannedTarget
                     : (command?.seed
