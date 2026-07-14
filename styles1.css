@@ -453,6 +453,7 @@ html::after {
 /* ---------------- Wheel core ---------------- */
 
 .canvas-container {
+    
     position: relative;
     width: 100%;
     max-width: 560px;
@@ -543,6 +544,8 @@ html::after {
 
 .overlay-content {
     display: flex;
+    position:fixed;
+    left:-6%;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -1907,6 +1910,8 @@ body li,
 
 .game-fullscreen-overlay {
     position: fixed;
+    width: -webkit-fit-content;
+    height: -webkit-fit-content;
     inset: 0;
     z-index: 70;
     display: none;
@@ -2026,11 +2031,17 @@ body li,
     box-shadow: 0 10px 24px rgba(0, 245, 255, 0.2);
 }
 
-.game-next-btn:hover,
+.game-next-btn:hover{
+   
+    background: linear-gradient(135deg, rgba(0, 245, 255, 0.25), rgba(138, 43, 226, 0.4));
+border-color:  rgba(0, 245, 255, 0.25);
+font-color: white;
+text-color: white;
+box-shadow: 0 10px 24px rgba(0, 245, 255, 0.2);
+}
 .game-enter-btn:hover {
-    filter: brightness(1.08);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.32), 0 0 18px rgba(255, 217, 102, 0.16);
+  
+    background: linear-gradient(135deg, #ffdf79, #e9aa35);
 }
 
 .game-next-btn:focus-visible,
