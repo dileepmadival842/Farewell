@@ -981,6 +981,26 @@ html::after {
     transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
+.round-complete-item { position: relative; }
+
+.round-complete-remove {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(255, 90, 110, 0.55);
+    border-radius: 50%;
+    color: #ff8b9b;
+    background: rgba(80, 12, 24, 0.8);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    z-index: 2;
+}
+
+.round-complete-remove:hover { background: #9b122a; transform: scale(1.08); }
+
 .round-complete-item:hover {
     transform: translateY(-2px);
     border-color: rgba(255, 214, 102, 0.8);
@@ -1131,6 +1151,51 @@ img.round-complete-avatar {
     grid-template-columns: 1fr;
     max-height: 360px;
     align-items: start;
+}
+
+.saved-nav-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.saved-nav-btn {
+    min-height: 44px;
+    padding: 0.65rem 1.1rem;
+    border: 2px solid rgba(255, 214, 102, 0.42);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--cyan);
+    background: rgba(255, 214, 102, 0.08);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.saved-nav-btn:not(a) {
+    cursor: pointer;
+}
+
+.saved-nav-btn:hover,
+.saved-nav-btn:focus-visible {
+    background: rgba(255, 214, 102, 0.16);
+    box-shadow: 0 0 18px rgba(255, 214, 102, 0.28);
+    transform: translateY(-1px);
+}
+
+.saved-nav-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .history-card {
