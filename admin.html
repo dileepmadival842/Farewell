@@ -132,11 +132,16 @@
                                 Upload poster
                             </span>
                         </label>
-                        <label class="field-label" for="gameDetails">Details optional</label>
-                        <textarea id="gameDetails" name="gameDetails" maxlength="360" placeholder="Short game details"></textarea>
-
-                        <label class="field-label" for="gameRequirements">Requirements optional</label>
-                        <textarea id="gameRequirements" name="gameRequirements" maxlength="360" placeholder="Items, setup, or rules needed"></textarea>
+                        <div class="game-form-details">
+                            <div class="game-form-field">
+                                <label class="field-label" for="gameDetails">Details optional</label>
+                                <textarea id="gameDetails" name="gameDetails" maxlength="360" placeholder="Short game details"></textarea>
+                            </div>
+                            <div class="game-form-field">
+                                <label class="field-label" for="gameRequirements">Requirements optional</label>
+                                <textarea id="gameRequirements" name="gameRequirements" maxlength="360" placeholder="Items, setup, or rules needed"></textarea>
+                            </div>
+                        </div>
 
                         <label class="game-enter-choice" for="gameHasEnter">
                             <input id="gameHasEnter" name="gameHasEnter" type="checkbox" />
