@@ -18,6 +18,11 @@
             <source src="index.mp4" type="video/mp4">
             Your browser does not support the title reveal video.
         </video>
+        <div class="welcome-brand" aria-hidden="true">
+            <span>FAREWELL 2026</span>
+            <strong>SMRITHIPATHA</strong>
+            <small>Memories that keep spinning</small>
+        </div>
     </main>
 
     <div class="app-shell" id="appShell">
@@ -108,6 +113,20 @@
                     <span>no saved details yet</span>
                 </div>
             </div>
+            <div class="saved-nav-actions" aria-label="More games">
+                <button class="saved-nav-btn" id="quickFiveBtn" type="button">
+                    <i class="fas fa-forward-fast"></i>
+                    test 5 spins
+                </button>
+                <a class="saved-nav-btn" href="video.html">
+                    <i class="fas fa-video"></i>
+                    videos
+                </a>
+                <a class="saved-nav-btn" href="numbers.html">
+                    <i class="fas fa-hashtag"></i>
+                    number game
+                </a>
+            </div>
         </div>
     </div>
     <section class="round-complete-overlay" id="roundCompleteOverlay" aria-live="polite" aria-hidden="true">
@@ -130,7 +149,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
-    <script src="script.js?v=timer-sound-1" defer></script>
+    <script src="script.js?v=quick-five-test-1" defer></script>
     <script src="welcome.js" defer></script>
 </body>
 </html>
