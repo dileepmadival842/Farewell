@@ -57,13 +57,15 @@
 
             const ROUND_SIZE = 5;
             let roundPicks = [];
-
-            // These numbers are reserved for the fifth round. There are six
-            // eligible numbers for five spins, so one of them will remain
-            // unselected after round 5.
-            const ROUND_FIVE_NUMBERS = Object.freeze([39, 37, 11, 6, 32, 1]);
+            // These five people are intentionally held for the fifth round.
+            // The deferred people are held out of round 5, then released into
+            // the following rounds. Number 45 is held separately as the final pick.
+            const ROUND_FIVE_NUMBERS = Object.freeze([39, 37, 11, 6, 38]);
+            const AFTER_ROUND_FIVE_NUMBERS = Object.freeze([27, 1]);
             const ROUND_FIVE_NUMBER_SET = new Set(ROUND_FIVE_NUMBERS);
-            const ROUND_FIVE_INDEX = 4;
+            const AFTER_ROUND_FIVE_NUMBER_SET = new Set(AFTER_ROUND_FIVE_NUMBERS);
+            const FINAL_NUMBER = 45;
+
 
             const gameOptions = [
                 { id: 'musical-chair', name: 'Musical Chair', image_url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=900&q=80', has_enter: false },
@@ -557,6 +559,7 @@
             const historyGrid = document.getElementById('historyGrid');
             const nextBtn = document.getElementById('nextBtn');
             const savedGrid = document.getElementById('savedGrid');
+            const quickFiveBtn = document.getElementById('quickFiveBtn');
             const gameRevealSection = document.getElementById('gameRevealSection');
             const gameRevealCard = document.getElementById('gameRevealCard');
             const gameFullscreenOverlay = document.getElementById('gameFullscreenOverlay');
@@ -717,18 +720,19 @@
 
             // ---------- update displays ----------
             function updateDisplays() {
+                const roundTargetSize = getCurrentRoundTargetSize();
                 pickedCountEl.textContent = pickedSet.size;
                 leftCountEl.textContent = 45 - pickedSet.size;
-                nextBtn.disabled = roundPicks.length < ROUND_SIZE;
+                nextBtn.disabled = roundTargetSize === 0 || roundPicks.length < roundTargetSize;
                 nextBtn.innerHTML = '<i class="fas fa-arrow-right"></i> next';
 
-                roundBadge.textContent = `Round ${roundPicks.length}/${ROUND_SIZE}`;
+                roundBadge.textContent = `Round ${roundPicks.length}/${roundTargetSize}`;
 
                 if (roundPicks.length === 0) {
                     roundResults.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-hand-pointer"></i>
-                            <span>spin 5 times to complete round</span>
+                            <span>spin ${roundTargetSize} time${roundTargetSize === 1 ? '' : 's'} to complete round</span>
                         </div>
                     `;
                 } else {
@@ -740,7 +744,7 @@
                                 <div class="r-number">${p.number}</div>
                             </div>
                             <div class="r-spin-num">spin ${index + 1}</div>
-                            <button class="remove-person-btn" data-number="${p.number}" aria-label="Remove ${escapeHtml(p.name)}">
+                            <button class="remove-person-btn" data-number="${p.number}" aria-label="Remove ${escapeHtml(p.name)} from this round" title="Remove from this round">
                                 <i class="fas fa-xmark"></i>
                             </button>
                         </div>
@@ -816,6 +820,9 @@
 
             function updateSpinButtonState() {
                 spinBtn.disabled = Boolean(isSpinning || scheduledSpinTimeout || isSpinBlockedByGameReveal());
+                if (quickFiveBtn) {
+                    quickFiveBtn.disabled = spinBtn.disabled;
+                }
             }
 
             function blockSpinIfGameRevealVisible() {
@@ -1089,11 +1096,17 @@
             function showRoundCompleteOverlay() {
                 if (!roundCompleteOverlay || !roundCompleteGrid) return;
 
+                const selectedCountLabel = roundCompleteOverlay.querySelector('.round-complete-head strong');
+                if (selectedCountLabel) selectedCountLabel.textContent = `${roundPicks.length} selected`;
+
                 roundCompleteGrid.innerHTML = roundPicks.map((person) => `
                     <div class="round-complete-item">
                         ${getAvatarMarkup(person, 'round-complete-avatar')}
                         <div class="round-complete-name">${escapeHtml(person.name)}</div>
                         <div class="round-complete-number">${person.number}</div>
+                        <button class="round-complete-remove" type="button" data-number="${person.number}" aria-label="Remove ${escapeHtml(person.name)} from selected seniors" title="Remove person">
+                            <i class="fas fa-xmark"></i>
+                        </button>
                     </div>
                 `).join('');
 
@@ -1112,7 +1125,7 @@
                 overlayInitial.hidden = false;
                 updateSpeedBar(0);
 
-                if (roundPicks.length >= ROUND_SIZE) {
+                if (roundPicks.length >= getCurrentRoundTargetSize()) {
                     showRoundCompleteOverlay();
                 } else {
                     hideRoundCompleteOverlay();
@@ -1120,18 +1133,55 @@
             }
 
             function getAvailableNumbers() {
-                const isRoundFive = savedRounds.length === ROUND_FIVE_INDEX;
                 const available = [];
+                const roundIndex = savedRounds.length;
                 for (let i = 1; i <= NUM_SEGMENTS; i++) {
                     if (pickedSet.has(i)) continue;
 
-                    // Keep the preselected group out of rounds 1-4. In round
-                    // 5, make it the only group that can be landed on.
-                    if (isRoundFive ? ROUND_FIVE_NUMBER_SET.has(i) : !ROUND_FIVE_NUMBER_SET.has(i)) {
-                        available.push(i);
-                    }
+                    // Rounds 1-4 cannot select reserved people or #45.
+                    // Round 5 selects only the five fifth-round people; the
+                    // deferred people are released from round 6 onward.
+                    if (roundIndex < 4 && (ROUND_FIVE_NUMBER_SET.has(i) || AFTER_ROUND_FIVE_NUMBER_SET.has(i) || i === FINAL_NUMBER)) continue;
+                    if (roundIndex === 4 && !ROUND_FIVE_NUMBER_SET.has(i)) continue;
+                    if (roundIndex > 4 && i === FINAL_NUMBER && pickedSet.size < NUM_SEGMENTS - 1) continue;
+                    available.push(i);
                 }
                 return available;
+            }
+
+            function getCurrentRoundTargetSize() {
+                const available = getAvailableNumbers();
+                // Count #45 while it is being held back so the final groups
+                // still follow the 7 => 4 + 3 and 6 => 6 grouping rules.
+                const heldFinalNumber = savedRounds.length > 4 &&
+                    !pickedSet.has(FINAL_NUMBER) &&
+                    !available.includes(FINAL_NUMBER);
+                const peopleInThisRound = available.length + roundPicks.length + (heldFinalNumber ? 1 : 0);
+                if (peopleInThisRound === 0) return 0;
+                if (peopleInThisRound === 7) return 4;
+                if (peopleInThisRound === 6) return 6;
+                return Math.min(ROUND_SIZE, peopleInThisRound);
+            }
+
+            function addPick(number) {
+                const person = people[number - 1];
+                if (!person || pickedSet.has(number)) return false;
+                pickedSet.add(number);
+                pickedList.push({ ...person });
+                roundPicks.push({ ...person });
+                currentPerson = { ...person };
+                lastTargetNumber = number;
+                return true;
+            }
+
+            function autoSelectLastPersonIfNeeded() {
+                // Round 5 must always show five real spins, even when only one
+                // reserved person remains available.
+                if (savedRounds.length === 4) return false;
+
+                const available = getAvailableNumbers();
+                if (available.length !== 1 || roundPicks.length >= getCurrentRoundTargetSize()) return false;
+                return addPick(available[0]);
             }
 
             function hashString(value) {
@@ -1232,7 +1282,7 @@
                 if (blockSpinIfGameRevealVisible()) return;
                 if (isSpinning || scheduledSpinTimeout) return;
 
-                if (roundPicks.length >= ROUND_SIZE) {
+                if (roundPicks.length >= getCurrentRoundTargetSize()) {
                     showRoundCompleteOverlay();
                     showToast('Round complete. Review the results and continue.');
                     return;
@@ -1281,7 +1331,7 @@
                 if (isSpinning) return;
                 scheduledSpinTimeout = null;
 
-                if (roundPicks.length >= ROUND_SIZE) {
+                if (roundPicks.length >= getCurrentRoundTargetSize()) {
                     showRoundCompleteOverlay();
                     showToast('Round complete. Review the results and continue.');
                     return;
@@ -1429,20 +1479,20 @@
 
                             overlay.classList.remove('active');
 
-                            pickedSet.add(targetNumber);
-                            pickedList.push({ ...person });
-                            roundPicks.push({ ...person });
-                            currentPerson = { ...person };
-                            lastTargetNumber = targetNumber;
+                            addPick(targetNumber);
+                            const autoSelected = autoSelectLastPersonIfNeeded();
 
                             updateDisplays();
-                            persistState('spin-result', { targetNumber });
+                            persistState(autoSelected ? 'spin-result-auto-completed' : 'spin-result', {
+                                targetNumber,
+                                autoSelectedNumber: autoSelected ? lastTargetNumber : null
+                            });
 
                             isSpinning = false;
                             updateSpinButtonState();
                             flushPendingRemoteState();
 
-                            if (roundPicks.length >= ROUND_SIZE) {
+                            if (roundPicks.length >= getCurrentRoundTargetSize()) {
                                 setTimeout(() => {
                                     showRoundCompleteOverlay();
                                     showToast('Round complete. Review the results and continue.');
@@ -1487,6 +1537,51 @@
                 showToast('Wheel reset.');
             }
 
+            async function quickSelectFiveForTesting() {
+                if (blockSpinIfGameRevealVisible()) return;
+                if (isSpinning || scheduledSpinTimeout) return;
+
+                let roundTargetSize = getCurrentRoundTargetSize();
+                if (roundTargetSize === 0) {
+                    showToast('Wheel is empty. All numbers are selected.');
+                    return;
+                }
+
+                if (roundPicks.length >= roundTargetSize) {
+                    showRoundCompleteOverlay();
+                    showToast('Round complete. Review the results and continue.');
+                    return;
+                }
+
+                let addedCount = 0;
+                while (addedCount < ROUND_SIZE && roundPicks.length < roundTargetSize) {
+                    const available = getAvailableNumbers();
+                    if (available.length === 0) break;
+
+                    const targetNumber = available[Math.floor(Math.random() * available.length)];
+                    if (addPick(targetNumber)) {
+                        addedCount += 1;
+                        roundTargetSize = getCurrentRoundTargetSize();
+                    } else {
+                        break;
+                    }
+                }
+
+                const autoSelected = autoSelectLastPersonIfNeeded();
+                updateDisplays();
+                await persistState(autoSelected ? 'quick-test-spins-auto-completed' : 'quick-test-spins', {
+                    selectedCount: addedCount,
+                    autoSelectedNumber: autoSelected ? lastTargetNumber : null
+                });
+
+                if (roundPicks.length >= getCurrentRoundTargetSize()) {
+                    showRoundCompleteOverlay();
+                    showToast(`Test selected ${addedCount} people. Round complete.`);
+                } else if (addedCount > 0) {
+                    showToast(`Test selected ${addedCount} people.`);
+                }
+            }
+
             async function saveCurrentAndShowSaved() {
                 hideRoundCompleteOverlay();
 
@@ -1495,8 +1590,9 @@
                     return;
                 }
 
-                if (roundPicks.length < ROUND_SIZE) {
-                    showToast(`Select ${ROUND_SIZE} people before clicking Next.`);
+                const roundTargetSize = getCurrentRoundTargetSize();
+                if (roundPicks.length < roundTargetSize) {
+                    showToast(`Select ${roundTargetSize} people before clicking Next.`);
                     return;
                 }
 
@@ -1508,10 +1604,11 @@
                 savedRounds.push(pickedList.map((person) => ({ ...person })));
 
                 resetCurrentRound();
+                const autoSelected = autoSelectLastPersonIfNeeded();
                 updateDisplays();
                 await refreshGameStateFromCloud();
                 revealSelectedGame();
-                await persistState('round-saved');
+                await persistState(autoSelected ? 'round-saved-auto-selected' : 'round-saved');
                 showToast(selectedGame ? `${selectedGame.name} revealed.` : 'Round saved. Waiting for admin game.');
             }
 
@@ -1519,10 +1616,10 @@
                 const parsedNumber = Number(number);
                 if (!Number.isInteger(parsedNumber)) return;
 
+                if (!roundPicks.some((person) => person.number === parsedNumber)) return;
+
                 removeFromList(pickedList, parsedNumber);
                 removeFromList(roundPicks, parsedNumber);
-                removeFromList(savedPeople, parsedNumber);
-                removeFromSavedRounds(parsedNumber);
 
                 if (currentPerson?.number === parsedNumber) currentPerson = null;
                 if (lastTargetNumber === parsedNumber) lastTargetNumber = null;
@@ -1531,18 +1628,12 @@
                 updateDisplays();
                 syncSharedUi();
                 persistState('person-removed', { number: parsedNumber });
+                showToast('Person removed from this round and the wheel. Spin again to replace them.');
             }
 
             function removeFromList(list, number) {
                 const index = list.findIndex((person) => person.number === number);
                 if (index !== -1) list.splice(index, 1);
-            }
-
-            function removeFromSavedRounds(number) {
-                for (let i = savedRounds.length - 1; i >= 0; i--) {
-                    removeFromList(savedRounds[i], number);
-                    if (savedRounds[i].length === 0) savedRounds.splice(i, 1);
-                }
             }
 
             // ---------- init ----------
@@ -1570,6 +1661,7 @@
 
             // ---------- events ----------
             spinBtn.addEventListener('click', requestSpin);
+            quickFiveBtn?.addEventListener('click', quickSelectFiveForTesting);
             clearBtn.addEventListener('click', () => clearAllState());
             nextBtn.addEventListener('click', saveCurrentAndShowSaved);
             roundCompleteNext?.addEventListener('click', saveCurrentAndShowSaved);
@@ -1596,7 +1688,7 @@
             });
 
             document.addEventListener('click', (e) => {
-                const removeButton = e.target.closest('.remove-person-btn');
+                const removeButton = e.target.closest('.remove-person-btn, .round-complete-remove');
                 if (!removeButton) return;
                 removePerson(removeButton.dataset.number);
             });
